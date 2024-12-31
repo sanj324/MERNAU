@@ -15,14 +15,8 @@ export default function Headrer() {
             <Link to="/about">
             <li>About</li>
             </Link>
-            <Link to="/profile">
-            <li>Profile</li>
-            </Link>
             <Link to="/signin">
             <li>Signin</li>
-            </Link>
-            <Link to="/signup">
-            <li>Signup</li>
             </Link>
           </ul> 
             </div>
