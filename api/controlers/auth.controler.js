@@ -5,12 +5,31 @@ import jwt from 'jsonwebtoken';
 
 export const signup = async (req, res, next) => {
     const { username, email, password } = req.body;
-    const hashedPassword = bcryptjs.hashSync(password, 10);
-    const newUser = new User({ username, email, password: hashedPassword });
     try {
-        await newUser.save();
-        res.status(201).json({ message: "User created successfully" });
+        // Log the request body
+        console.log('Signup request:', { username, email });
+        
+        // Check if user already exists
+        const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+        if (existingUser) {
+            return next(errorHandler(400, 'Username or email already exists'));
+        }
+
+        const hashedPassword = bcryptjs.hashSync(password, 10);
+        const newUser = new User({ username, email, password: hashedPassword });
+        
+        // Log the user object before saving
+        console.log('Attempting to save user:', newUser);
+        
+        const savedUser = await newUser.save();
+        console.log('User saved successfully:', savedUser);
+        
+        res.status(201).json({ 
+            success: true,
+            message: "User created successfully"
+        });
     } catch (error) {
+        console.error('Error in signup:', error);
         next(error);
     }
 };
