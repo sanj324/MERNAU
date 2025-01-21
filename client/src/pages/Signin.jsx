@@ -1,18 +1,19 @@
 import { Link } from 'react-router-dom' 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'  
+import { signinStart,signinSuccess,signinFailure } from '../redux/user/userslice';
+import { useDispatch, useSelector } from 'react-redux'
 
 export default function Signin() {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [formData, setFormData] = useState({
         username: '',
         email: '',
         password: ''
     });
-    const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(false);
-    
-    const handlechange = (e) => {
+    const {loading, error} = useSelector((state) => state.user);
+    const handlechange = (e) => {               
         setFormData({
             ...formData,
             [e.target.id]: e.target.value
@@ -22,8 +23,7 @@ export default function Signin() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            setError(null);
-            setLoading(true);
+            dispatch(signinStart());
             console.log('Submitting form data:', formData);
             
             const res = await fetch('http://localhost:3000/api/auth/signin', {
@@ -36,19 +36,17 @@ export default function Signin() {
             
             console.log('Response status:', res.status);
             const data = await res.json();
+            dispatch(signinSuccess(data));
             console.log('Response data:', data);
             
             if (data.success === false) {
-                setError(data.message);
+                dispatch(signinFailure(data.message));
                 return;
             }
             
-            setLoading(false);
-            setError(null);
             navigate('/');
         } catch (error) {
-            setLoading(false);
-            setError(error.message || 'Something went wrong!');
+            dispatch(signinFailure(error.message || 'Something went wrong!'));
             console.error('Error during signin:', error);
         }
     };
@@ -95,4 +93,3 @@ export default function Signin() {
         </div>
     )
 }
-
